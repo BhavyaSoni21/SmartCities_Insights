@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
@@ -7,9 +8,12 @@
     <title>Local Complaints | SmartCity Insight</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
+
 <body class="complaints-page">
     {% include 'navbar.html' %}
 
@@ -75,12 +79,16 @@
         <!-- Complaints List -->
         <section class="complaints-list">
             {% for complaint in complaints %}
-            <div class="complaint-card" data-status="{{ complaint.status }}" data-type="{{ complaint.issue_type }}" data-sla="{{ complaint.sla_status }}">
+            <div class="complaint-card" data-status="{{ complaint.status }}" data-type="{{ complaint.issue_type }}"
+                data-sla="{{ complaint.sla_status }}">
                 <div class="complaint-header">
                     <div class="complaint-meta">
                         <span class="complaint-id">#{{ complaint.id }}</span>
                         <span class="issue-type-badge {{ complaint.issue_type }}">
-                            {% if complaint.issue_type == 'garbage' %}🗑️{% elif complaint.issue_type == 'pothole' %}🛣️{% else %}💡{% endif %}
+                            {% if complaint.issue_type == 'garbage' %}🗑️
+                            {% elif complaint.issue_type == 'pothole'%}🛣️
+                            {% elif complaint.issue_type == 'streetlight'%}💡
+                            {% endif %}
                             {{ complaint.issue_type|title }}
                         </span>
                         <span class="status-badge {{ complaint.status }}">
@@ -101,29 +109,52 @@
                     <div class="complaint-content">
                         <h3 class="complaint-title">{{ complaint.description|truncatewords:15 }}</h3>
                         <p class="complaint-description">{{ complaint.description }}</p>
-                        
+
                         <div class="complaint-location">
                             <span class="location-icon">📍</span>
-                            <span>{{ complaint.landmark|default:"Coordinates: "|add:complaint.latitude|add:", "|add:complaint.longitude }}</span>
+                            <span>{{ complaint.landmark|default:'Location' }}
+                                {% if complaint.latitude and complaint.longitude %}
+                                ({{ complaint.latitude }}, {{ complaint.longitude }})
+                                {% endif %}
+                            </span>
                         </div>
 
                         <div class="complaint-reporter">
                             <span class="reporter-label">Reported by:</span>
-                            <span class="reporter-name">{{ complaint.user.name }}</span>
+                            <span class="reporter-name">{{ complaint.user.profile.name|default:complaint.user.username}}</span>
                         </div>
                     </div>
 
                     <div class="complaint-images">
+
+                        {% if complaint.before_image and complaint.before_image.url %}
                         <div class="image-container">
                             <div class="image-label">Before</div>
-                            <img src="{{ complaint.before_image.url }}" alt="Before image" class="complaint-image">
+                            <img
+                                src="{{ complaint.before_image.url }}"
+                                alt="Before image"
+                                class="complaint-image"
+                                loading="lazy"
+                            >
+                           <small class="debug-path">{{ complaint.before_image.url }}</small>
                         </div>
-                        
-                        {% if complaint.status == 'resolved' and complaint.after_image %}
+                        {% else %}
+                        <div class="image-placeholder">
+                            <div class="placeholder-text">No Before Image</div>
+                        </div>
+                        {% endif %}
+                    
+                        {% if complaint.status == 'resolved' and complaint.after_image and complaint.after_image.url %}
                         <div class="image-arrow">→</div>
                         <div class="image-container">
                             <div class="image-label">After</div>
-                            <img src="{{ complaint.after_image.url }}" alt="After image" class="complaint-image">
+                            <img
+                                src="{{ complaint.after_image.url }}"
+                                alt="After image"
+                                class="complaint-image"
+                                loading="lazy"
+                            >
+                            <small class="debug-path">{{ complaint.after_image.url }}</small>
                         </div>
                         {% else %}
                         <div class="image-placeholder">
@@ -151,13 +182,14 @@
                         {% else %}
                         <div class="timeline-item">
                             <span class="timeline-label">Pending for:</span>
-                            <span class="timeline-value {{ complaint.sla_class }}">{{ complaint.days_pending }} days</span>
+                            <span class="timeline-value {{ complaint.sla_class }}">{{ complaint.days_pending }}
+                                days</span>
                         </div>
                         {% endif %}
                     </div>
 
                     <div class="complaint-actions">
-                        <a href="complaint-detail.html?id={{ complaint.id }}" class="btn btn-outline btn-small">
+                        <a href="{% url 'complaint_detail' complaint.id %}" class="btn btn-outline btn-small">
                             View Details
                         </a>
                     </div>
@@ -183,11 +215,11 @@
 
             <div class="pagination-numbers">
                 {% for num in complaints.paginator.page_range %}
-                    {% if num == complaints.number %}
-                    <span class="pagination-number active">{{ num }}</span>
-                    {% else %}
-                    <a href="?page={{ num }}" class="pagination-number">{{ num }}</a>
-                    {% endif %}
+                {% if num == complaints.number %}
+                <span class="pagination-number active">{{ num }}</span>
+                {% else %}
+                <a href="?page={{ num }}" class="pagination-number">{{ num }}</a>
+                {% endif %}
                 {% endfor %}
             </div>
 
@@ -204,18 +236,18 @@
             const statusFilter = document.getElementById('statusFilter').value;
             const typeFilter = document.getElementById('typeFilter').value;
             const slaFilter = document.getElementById('slaFilter').value;
-            
+
             const cards = document.querySelectorAll('.complaint-card');
-            
+
             cards.forEach(card => {
                 const status = card.dataset.status;
                 const type = card.dataset.type;
                 const sla = card.dataset.sla;
-                
+
                 const matchStatus = statusFilter === 'all' || status === statusFilter;
                 const matchType = typeFilter === 'all' || type === typeFilter;
                 const matchSLA = slaFilter === 'all' || sla === slaFilter;
-                
+
                 if (matchStatus && matchType && matchSLA) {
                     card.style.display = 'block';
                 } else {
@@ -240,4 +272,5 @@
 
     <div class="background-pattern"></div>
 </body>
+
 </html>

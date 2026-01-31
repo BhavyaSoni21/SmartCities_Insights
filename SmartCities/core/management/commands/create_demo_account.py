@@ -29,10 +29,10 @@ class Command(BaseCommand):
         UserProfile.objects.update_or_create(
             user=user,
             defaults={
-                "name": "Demo User",
-                "role": "Citizen",
-                "locality": "Ward 1 - Central District",
-                "ward_number": "1",
+                "name": "Admin",
+                "role": "Admin",
+                "locality": "Mumbai",
+                "ward_number": "Entire Mumbai",
                 "mobile": "9999999999",
                 "age": 25,
             },

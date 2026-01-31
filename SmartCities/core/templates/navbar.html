@@ -2,6 +2,8 @@
 {% load static %}
 <nav class="navbar">
     <div class="navbar-container">
+
+        <!-- Brand -->
         <div class="navbar-brand">
             <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="brand-link">
                 <div class="brand-icon">11</div>
@@ -9,33 +11,46 @@
             </a>
         </div>
 
+        <!-- Menu -->
         <div class="navbar-menu" id="navbarMenu">
+
             {% if user.is_authenticated %}
             <!-- Authenticated Navigation -->
             <div class="nav-links">
-                <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
+
+                <a href="{% url 'dashboard' %}" 
+                   class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
                     <span class="nav-icon">📊</span>
                     <span>Dashboard</span>
                 </a>
-                
-                <a href="{% url 'complaints' %}" class="nav-link {% if request.path == '/complaints/' %}active{% endif %}">
+
+                <a href="{% url 'complaints' %}" 
+                   class="nav-link {% if request.path == '/complaints/' %}active{% endif %}">
                     <span class="nav-icon">📄</span>
                     <span>Complaints</span>
                 </a>
-                
-                <a href="{% url 'register_complaint' %}" class="nav-link {% if request.path == '/register-complaint/' %}active{% endif %}">
+
+                <!-- Citizen-only: New Complaint -->
+                {% if user.role != 'Admin' %}
+                <a href="{% url 'register_complaint' %}" 
+                   class="nav-link {% if request.path == '/register-complaint/' %}active{% endif %}">
                     <span class="nav-icon">➕</span>
                     <span>New Complaint</span>
                 </a>
+                {% endif %}
 
+                <!-- Admin-only -->
                 {% if user.role == 'Admin' %}
-                <a href="{% url 'admin_dashboard' %}" class="nav-link admin-link {% if request.path == '/admin-dashboard/' %}active{% endif %}">
+                <a href="{% url 'admin_dashboard' %}" 
+                   class="nav-link admin-link {% if request.path == '/admin-dashboard/' %}active{% endif %}">
                     <span class="nav-icon">🛡️</span>
                     <span>Admin Panel</span>
                 </a>
                 {% endif %}
+
             </div>
 
+            <!-- User Menu -->
             <div class="navbar-actions">
                 <div class="user-menu">
                     <button class="user-menu-toggle" onclick="toggleUserMenu()">
@@ -53,28 +68,30 @@
                                 <strong>{{ user.name }}</strong>
                                 <span>{{ user.email }}</span>
                             </div>
-                            <span class="role-badge {{ user.role|lower }}">{{ user.role }}</span>
+                            <span class="role-badge {{ user.role|lower }}">
+                                {{ user.role }}
+                            </span>
                         </div>
-                        
+
                         <div class="dropdown-divider"></div>
-                        
+
                         <a href="{% url 'profile' %}" class="dropdown-item">
                             <span class="item-icon">👤</span>
                             <span>My Profile</span>
                         </a>
-                        
+
                         <a href="#" class="dropdown-item">
                             <span class="item-icon">⚙️</span>
                             <span>Settings</span>
                         </a>
-                        
+
                         <a href="#" class="dropdown-item">
                             <span class="item-icon">📊</span>
                             <span>My Activity</span>
                         </a>
-                        
+
                         <div class="dropdown-divider"></div>
-                        
+
                         <a href="{% url 'logout' %}" class="dropdown-item logout-item">
                             <span class="item-icon">🚪</span>
                             <span>Logout</span>
@@ -89,21 +106,27 @@
                 <a href="{% url 'home' %}" class="nav-link">Home</a>
                 <a href="#about" class="nav-link">About SDG 11</a>
             </div>
-            
+
             <div class="navbar-actions">
-                <a href="{% url 'login' %}" class="btn btn-primary btn-small">Login / Register</a>
+                <a href="{% url 'login' %}" class="btn btn-primary btn-small">
+                    Login / Register
+                </a>
             </div>
             {% endif %}
+
         </div>
 
+        <!-- Mobile Toggle -->
         <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
             <span class="hamburger"></span>
             <span class="hamburger"></span>
             <span class="hamburger"></span>
         </button>
+
     </div>
 </nav>
 
+<!-- Navbar Scripts -->
 <script>
     function toggleUserMenu() {
         const dropdown = document.getElementById('userDropdown');
@@ -115,11 +138,10 @@
         menu.classList.toggle('mobile-active');
     }
 
-    // Close dropdowns when clicking outside
     document.addEventListener('click', function(event) {
         const userMenu = document.querySelector('.user-menu');
         const dropdown = document.getElementById('userDropdown');
-        
+
         if (userMenu && !userMenu.contains(event.target)) {
             dropdown.classList.remove('active');
         }
