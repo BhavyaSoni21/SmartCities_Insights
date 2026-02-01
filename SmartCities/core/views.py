@@ -10,6 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder # Better serializatio
 
 from .models import Complaint, UserProfile
 
+from .forms import UserForm, ProfileForm
 
 def _attach_profile_attrs(request: HttpRequest) -> None:
     """
@@ -46,9 +47,14 @@ def home(request: HttpRequest) -> HttpResponse:
 @login_required
 def dashboard(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
-    # Fetch real stats for the logged-in user if they are a citizen
-    user_complaints = Complaint.objects.filter(user=request.user)
     
+    # Fetch complaints based on user role
+    if request.user.role == 'Admin':
+        # Admins see all complaints from their locality
+        user_complaints = Complaint.objects.filter(user__profile__locality=request.user.locality)
+    else:
+        # Citizens see only their own complaints
+        user_complaints = Complaint.objects.filter(user=request.user)
     
     # Calculate stats
     total_complaints = user_complaints.count()
@@ -75,9 +81,9 @@ def dashboard(request: HttpRequest) -> HttpResponse:
             'total_complaints': total_complaints,
             'resolved_complaints': resolved_complaints,
             'pending_complaints': pending_complaints,
-            'sla_breached': 0, # Calculate if needed
+            'sla_breached': sum(1 for c in user_complaints if c.sla_status == 'breached'),
             'avg_resolution_time': '--',
-            'active_reporters': 0,
+            'active_reporters': user_complaints.values('user').distinct().count(),
             'recent_activities': [
                 {
                     'id': c.id,
@@ -99,7 +105,15 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 @login_required
 def complaints(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
-    complaints_list = Complaint.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Fetch complaints based on user role
+    if request.user.role == 'Admin':
+        # Admins see all complaints from their locality
+        complaints_list = Complaint.objects.filter(user__profile__locality=request.user.locality).order_by('-created_at')
+    else:
+        # Citizens see only their own complaints
+        complaints_list = Complaint.objects.filter(user=request.user).order_by('-created_at')
+    
     return render(request, 'complaints.html', {'complaints': complaints_list})
 
 
@@ -113,7 +127,23 @@ def complaint_detail(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 def profile(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
-    return render(request, 'profile.html', {})
+    
+    # Fetch complaints for the current user
+    user_complaints = Complaint.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Calculate stats
+    total_complaints = user_complaints.count()
+    resolved_complaints = user_complaints.filter(status='resolved').count()
+    pending_complaints = user_complaints.filter(status='pending').count()
+    
+    context = {
+        'user_complaints': user_complaints,
+        'user_total_complaints': total_complaints,
+        'user_resolved_complaints': resolved_complaints,
+        'user_pending_complaints': pending_complaints,
+    }
+    
+    return render(request, 'profile.html', context)
 
 
 @login_required
@@ -348,3 +378,25 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     # Navbar uses this named URL; always return to home.
     return redirect(reverse('home'))
 
+@login_required
+def profile_settings(request):
+    user = request.user
+    profile = user.profile
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect('profile_settings')
+
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+
+    return render(request, 'settings.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })

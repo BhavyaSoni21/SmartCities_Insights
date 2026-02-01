@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
@@ -7,9 +8,12 @@
     <title>My Profile | SmartCity Insight</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
+
 <body class="profile-page">
     {% include 'navbar.html' %}
 
@@ -79,7 +83,7 @@
                 </div>
 
                 <div class="profile-actions">
-                    <a href="#" class="btn btn-secondary btn-block">Edit Profile</a>
+                    <a href="{% url 'profile_settings' %}" class="btn btn-secondary btn-block">Edit Profile</a>
                     <a href="#" class="btn btn-outline btn-block">Change Password</a>
                 </div>
             </aside>
@@ -97,7 +101,7 @@
                         </button>
                     </div>
                 </div>
-
+                <!-- Complaints Content -->
                 <!-- Cards View -->
                 <div id="cardsView" class="complaints-cards">
                     {% for complaint in user_complaints %}
@@ -106,7 +110,10 @@
                             <div class="card-meta">
                                 <span class="complaint-id">#{{ complaint.id }}</span>
                                 <span class="issue-type-badge {{ complaint.issue_type }}">
-                                    {% if complaint.issue_type == 'garbage' %}🗑️{% elif complaint.issue_type == 'pothole' %}🛣️{% else %}💡{% endif %}
+                                    {% if complaint.issue_type == 'garbage' %}🗑️
+                                    {% elif complaint.issue_type == 'pothole' %}🛣️
+                                    {% elif complaint.issue_type == 'streetlight' %}💡
+                                    {% endif %}
                                     {{ complaint.issue_type|title }}
                                 </span>
                             </div>
@@ -115,7 +122,7 @@
 
                         <div class="card-body">
                             <p class="card-description">{{ complaint.description }}</p>
-                            
+
                             <div class="card-location">
                                 <span class="location-icon">📍</span>
                                 {{ complaint.landmark|default:"Location coordinates attached" }}
@@ -144,7 +151,8 @@
                                 {% if complaint.status == 'resolved' %}
                                 <div class="timeline-entry resolved">
                                     <span class="timeline-icon">✓</span>
-                                    <span class="timeline-text">Resolved {{ complaint.resolved_at|timesince }} ago</span>
+                                    <span class="timeline-text">Resolved {{ complaint.resolved_at|timesince }}
+                                        ago</span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -222,7 +230,8 @@
                                     </td>
                                     <td>{{ complaint.created_at|date:"d M Y" }}</td>
                                     <td>
-                                        <a href="complaint-detail.html?id={{ complaint.id }}" class="btn btn-outline btn-small">
+                                        <a href="{% url 'complaint_detail' pk=complaint.id %}"
+                                            class="btn btn-outline btn-small">
                                             View
                                         </a>
                                     </td>
@@ -262,4 +271,5 @@
 
     <div class="background-pattern"></div>
 </body>
+
 </html>

@@ -2868,3 +2868,108 @@
             border: 1px solid #000;
         }
     }
+
+    /* ========== SETTINGS PAGE ========== */
+    /* =========================
+   SETTINGS PAGE LAYOUT
+========================= */
+
+.settings-page {
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.settings-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.settings-header {
+    background-color: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px var(--shadow-color);
+}
+
+.settings-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: var(--text-primary);
+}
+
+.settings-header p {
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* =========================
+   FORM CONTAINER
+========================= */
+
+.settings-form {
+    background-color: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: 0 2px 12px var(--shadow-color);
+}
+
+/* =========================
+   FORM SECTIONS
+========================= */
+
+.settings-form h2 {
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    color: var(--primary-color);
+}
+
+/* =========================
+   FORM FIELDS
+========================= */
+
+.settings-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.settings-form .form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.settings-form .form-group input,
+.settings-form .form-group select,
+.settings-form .form-group textarea {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid #dcdcdc;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-form .form-group input:focus,
+.settings-form .form-group select:focus,
+.settings-form .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.form-actions {
+    margin-top: 2rem;
+    text-align: right;
+}

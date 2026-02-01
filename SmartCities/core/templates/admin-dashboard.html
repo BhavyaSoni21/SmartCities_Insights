@@ -1,56 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | SmartCity Insight</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body class="admin-page">
+
+    <body class="admin-page">
+
     {% include 'navbar.html' %}
 
-    {% if user.is_authenticated and user.role == 'Admin' %}
+    {% if user.is_authenticated and user.profile.role == 'Admin' %}
+
     <div class="admin-container">
+
+        <!-- ================= HEADER ================= -->
         <header class="admin-header">
             <div class="header-content">
                 <div>
                     <h1 class="page-title">Ward Admin Dashboard</h1>
-                    <p class="page-subtitle">{{ user.locality }} - Complaint Management</p>
+                    <p class="page-subtitle">
+                        {{ user.profile.locality }} · Complaint Management
+                    </p>
                 </div>
                 <div class="admin-badge">
                     <span class="badge-icon">🛡️</span>
-                    <span>Ward Member</span>
+                    <span>Ward Admin</span>
                 </div>
             </div>
         </header>
 
-        <!-- Alert Banner for SLA Breaches -->
+        <!-- ================= SLA ALERT ================= -->
         {% if sla_breached_count > 0 %}
         <div class="alert-banner critical">
             <div class="alert-icon">⚠️</div>
             <div class="alert-content">
-                <strong>Urgent: {{ sla_breached_count }} SLA Breached Complaints</strong>
-                <p>These complaints require immediate attention to maintain service standards</p>
+                <strong>{{ sla_breached_count }} SLA Breached Complaints</strong>
+                <p>Immediate action required</p>
             </div>
-            <a href="#sla-breached-section" class="alert-action">View Now →</a>
+            <a href="#sla-breached-section" class="alert-action">
+                View →
+            </a>
         </div>
         {% endif %}
 
-        <!-- Admin Statistics -->
+        <!-- ================= STATS ================= -->
         <section class="admin-stats">
             <div class="stats-grid">
+
                 <div class="admin-stat-card total">
                     <div class="stat-icon">📋</div>
                     <div class="stat-content">
                         <div class="stat-value">{{ total_complaints }}</div>
                         <div class="stat-label">Total Complaints</div>
-                        <div class="stat-change">This month: {{ monthly_complaints }}</div>
                     </div>
                 </div>
 
@@ -58,8 +70,7 @@
                     <div class="stat-icon">⏳</div>
                     <div class="stat-content">
                         <div class="stat-value">{{ pending_complaints }}</div>
-                        <div class="stat-label">Pending Action</div>
-                        <div class="stat-change">Requires resolution</div>
+                        <div class="stat-label">Pending</div>
                     </div>
                 </div>
 
@@ -68,7 +79,6 @@
                     <div class="stat-content">
                         <div class="stat-value">{{ resolved_complaints }}</div>
                         <div class="stat-label">Resolved</div>
-                        <div class="stat-change">{{ resolution_rate }}% resolution rate</div>
                     </div>
                 </div>
 
@@ -77,287 +87,212 @@
                     <div class="stat-content">
                         <div class="stat-value">{{ sla_breached_count }}</div>
                         <div class="stat-label">SLA Breached</div>
-                        <div class="stat-change">Escalated complaints</div>
                     </div>
                 </div>
+
             </div>
         </section>
 
-        <!-- Map View -->
+        <!-- ================= MAP ================= -->
         <section class="map-section">
-            <h2 class="section-title">Locality Complaint Map</h2>
+            <h2 class="section-title">Complaint Map</h2>
             <div id="adminMap" class="admin-map"></div>
-            <div class="map-legend">
-                <div class="legend-item">
-                    <span class="map-marker pending-marker"></span>
-                    <span>Pending</span>
-                </div>
-                <div class="legend-item">
-                    <span class="map-marker resolved-marker"></span>
-                    <span>Resolved</span>
-                </div>
-                <div class="legend-item">
-                    <span class="map-marker breached-marker"></span>
-                    <span>SLA Breached</span>
-                </div>
-            </div>
         </section>
 
-        <!-- SLA Breached Complaints - Priority Section -->
-        <section class="priority-section" id="sla-breached-section">
+        <!-- ================= SLA BREACHED ================= -->
+        <section id="sla-breached-section" class="priority-section">
             <div class="section-header">
-                <h2 class="section-title critical">🚨 SLA Breached - Urgent Action Required</h2>
-                <span class="priority-badge">{{ sla_breached_complaints|length }} Complaints</span>
+                <h2 class="section-title critical">🚨 SLA Breached</h2>
+                <span class="priority-badge">
+                    {{ sla_breached_complaints|length }} Complaints
+                </span>
             </div>
 
             <div class="complaints-grid">
                 {% for complaint in sla_breached_complaints %}
                 <div class="admin-complaint-card sla-breached">
-                    <div class="breach-indicator">
-                        <span class="breach-icon">⚠️</span>
-                        <span class="breach-text">{{ complaint.days_overdue }} days overdue</span>
+
+                    <div class="card-header">
+                        <span class="complaint-id">#{{ complaint.id }}</span>
+                        <span class="overdue">
+                            {{ complaint.days_overdue }} days overdue
+                        </span>
                     </div>
 
-                    <div class="card-content">
-                        <div class="card-header">
-                            <div class="card-meta">
-                                <span class="complaint-id">#{{ complaint.id }}</span>
-                                <span class="issue-badge {{ complaint.issue_type }}">
-                                    {{ complaint.issue_type|title }}
-                                </span>
-                            </div>
-                            <span class="timestamp">{{ complaint.created_at|date:"d M Y" }}</span>
-                        </div>
+                    <p class="card-description">
+                        {{ complaint.description }}
+                    </p>
 
-                        <p class="card-description">{{ complaint.description }}</p>
+                    <div class="card-meta">
+                        <span>📍 {{ complaint.landmark|default:"Location not provided" }}</span>
+                        <span>⏱️ {{ complaint.days_pending }} days pending</span>
+                    </div>
 
-                        <div class="card-details">
-                            <div class="detail-row">
-                                <span class="detail-label">📍 Location:</span>
-                                <span class="detail-value">{{ complaint.landmark }}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">👤 Reporter:</span>
-                                <span class="detail-value">{{ complaint.user.name }}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">⏱️ Pending Since:</span>
-                                <span class="detail-value critical">{{ complaint.days_pending }} days</span>
-                            </div>
-                        </div>
-
-                        <div class="card-image">
-                            <img src="{{ complaint.before_image.url }}" alt="Issue image">
-                        </div>
-
-                        <div class="card-actions">
-                            <button class="btn btn-primary btn-small" onclick="openResolveModal({{ complaint.id }})">
-                                Resolve Now
-                            </button>
-                            <a href="#" class="btn btn-outline btn-small">View Details</a>
-                        </div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-small"
+                                onclick="openResolveModal({{ complaint.id }})">
+                            Resolve Now
+                        </button>
                     </div>
                 </div>
                 {% empty %}
                 <div class="empty-state success">
-                    <div class="empty-icon">✅</div>
-                    <h3>All Clear!</h3>
-                    <p>No SLA breached complaints. Great work maintaining service standards.</p>
+                    <h3>No SLA breaches 🎉</h3>
                 </div>
                 {% endfor %}
             </div>
         </section>
 
-        <!-- All Pending Complaints -->
+        <!-- ================= PENDING COMPLAINTS ================= -->
         <section class="pending-section">
             <div class="section-header">
                 <h2 class="section-title">Pending Complaints</h2>
-                <div class="section-filters">
-                    <select class="filter-select" id="typeFilterAdmin">
-                        <option value="all">All Types</option>
-                        <option value="garbage">Garbage</option>
-                        <option value="pothole">Pothole</option>
-                        <option value="streetlight">Streetlight</option>
-                    </select>
-                    <select class="filter-select" id="sortFilterAdmin">
-                        <option value="oldest">Oldest First</option>
-                        <option value="recent">Most Recent</option>
-                        <option value="sla">SLA Priority</option>
-                    </select>
-                </div>
             </div>
 
             <div class="complaints-grid">
                 {% for complaint in pending_complaints_list %}
                 <div class="admin-complaint-card">
-                    <div class="card-content">
-                        <div class="card-header">
-                            <div class="card-meta">
-                                <span class="complaint-id">#{{ complaint.id }}</span>
-                                <span class="issue-badge {{ complaint.issue_type }}">
-                                    {{ complaint.issue_type|title }}
-                                </span>
-                                {% if complaint.sla_status == 'breached' %}
-                                <span class="sla-warning">⚠️ SLA Risk</span>
-                                {% endif %}
-                            </div>
-                            <span class="timestamp">{{ complaint.created_at|timesince }} ago</span>
-                        </div>
 
-                        <p class="card-description">{{ complaint.description }}</p>
+                    <div class="card-header">
+                        <span class="complaint-id">#{{ complaint.id }}</span>
 
-                        <div class="card-details">
-                            <div class="detail-row">
-                                <span class="detail-label">📍</span>
-                                <span class="detail-value">{{ complaint.landmark|default:"See map location" }}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">👤</span>
-                                <span class="detail-value">{{ complaint.user.name }}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">⏱️</span>
-                                <span class="detail-value">{{ complaint.days_pending }} days pending</span>
-                            </div>
-                        </div>
+                        <span class="issue-badge {{ complaint.issue_type }}">
+                            {{ complaint.issue_type|title }}
+                        </span>
 
-                        <div class="card-image">
-                            <img src="{{ complaint.before_image.url }}" alt="Issue image">
-                        </div>
-
-                        <div class="card-actions">
-                            <button class="btn btn-primary btn-small" onclick="openResolveModal({{ complaint.id }})">
-                                Mark as Resolved
-                            </button>
-                            <a href="#" class="btn btn-outline btn-small">Details</a>
-                        </div>
+                        {% if complaint.sla_status == 'breached' %}
+                        <span class="sla-warning">⚠ SLA Risk</span>
+                        {% endif %}
                     </div>
+
+                    <p class="card-description">
+                        {{ complaint.description|truncatewords:25 }}
+                    </p>
+
+                    <div class="card-meta">
+                        <span>📍 {{ complaint.landmark|default:"See map" }}</span>
+                        <span>👤 {{ complaint.user.profile.name|default:complaint.user.username }}</span>
+                        <span>⏱️ {{ complaint.days_pending }} days pending</span>
+                    </div>
+
+                    {% if complaint.before_image %}
+                    <div class="card-image">
+                        <img src="{{ complaint.before_image.url }}" alt="Complaint image">
+                    </div>
+                    {% endif %}
+
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-small"
+                                onclick="openResolveModal({{ complaint.id }})">
+                            Mark as Resolved
+                        </button>
+                        <a href="{% url 'complaint_detail' complaint.id %}"
+                        class="btn btn-outline btn-small">
+                            View Details
+                        </a>
+                    </div>
+
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <p>No pending complaints.</p>
                 </div>
                 {% endfor %}
             </div>
         </section>
+
     </div>
 
-    <!-- Resolution Modal -->
+    <!-- ================= RESOLVE MODAL ================= -->
     <div id="resolveModal" class="modal">
         <div class="modal-content">
+
             <div class="modal-header">
-                <h2>Mark Complaint as Resolved</h2>
-                <button class="modal-close" onclick="closeResolveModal()">&times;</button>
+                <h2>Resolve Complaint</h2>
+                <button class="modal-close" onclick="closeResolveModal()">×</button>
             </div>
-            
-            <form action="{% url 'resolve_complaint' %}" method="POST" enctype="multipart/form-data" class="resolve-form">
+
+            <form method="POST"
+                action="{% url 'resolve_complaint' %}"
+                enctype="multipart/form-data">
+
                 {% csrf_token %}
-                <input type="hidden" id="complaintId" name="complaint_id">
+                <input type="hidden" name="complaint_id" id="complaintId">
 
                 <div class="form-group">
-                    <label for="afterImage">Upload After-Resolution Image <span class="required">*</span></label>
-                    <div class="file-upload-area">
-                        <input 
-                            type="file" 
-                            id="afterImage" 
-                            name="after_image" 
-                            accept="image/*"
-                            required
-                            class="file-input"
-                        >
-                        <div class="upload-placeholder">
-                            <div class="upload-icon">📸</div>
-                            <div class="upload-text">
-                                <p><strong>Upload resolution proof</strong></p>
-                                <p class="upload-hint">Clear photo showing resolved issue</p>
-                            </div>
-                        </div>
-                        <div class="image-preview" id="afterImagePreview"></div>
-                    </div>
+                    <label>Upload After Image</label>
+                    <input type="file" name="after_image" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="resolutionNotes">Resolution Notes (Optional)</label>
-                    <textarea 
-                        id="resolutionNotes" 
-                        name="resolution_notes" 
-                        rows="3"
-                        placeholder="Add any notes about the resolution..."
-                        class="form-textarea"
-                    ></textarea>
+                    <label>Resolution Notes</label>
+                    <textarea name="resolution_notes" rows="3"></textarea>
                 </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeResolveModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Confirm Resolution</button>
+                <div class="form-actions">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="closeResolveModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Confirm Resolution
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- ================= JS ================= -->
     <script>
-        // Initialize map
-        const adminMap = L.map('adminMap').setView([{{ ward_center_lat|default:"19.0760" }}, {{ ward_center_lng|default:"72.8777" }}], 14);
-        
+        const adminMap = L.map('adminMap').setView(
+            [
+                {{ ward_center_lat|default:"19.0760" }},
+                {{ ward_center_lng|default:"72.8777" }}
+            ],
+            13
+        );
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(adminMap);
 
-        // Add markers for all complaints
         const complaints = {{ complaints_json|safe }};
-        complaints.forEach(complaint => {
-            const markerColor = complaint.sla_status === 'breached' ? 'red' : 
-                                complaint.status === 'resolved' ? 'green' : 'orange';
-            
-            L.circleMarker([complaint.latitude, complaint.longitude], {
-                radius: 8,
-                fillColor: markerColor,
+
+        complaints.forEach(c => {
+            if (!c.latitude || !c.longitude) return;
+
+            const color =
+                c.sla_status === 'breached' ? 'red' :
+                c.status === 'resolved' ? 'green' : 'orange';
+
+            L.circleMarker([c.latitude, c.longitude], {
+                radius: 7,
+                fillColor: color,
                 color: '#fff',
                 weight: 2,
-                opacity: 1,
                 fillOpacity: 0.8
             }).addTo(adminMap)
-              .bindPopup(`
-                  <strong>#${complaint.id} - ${complaint.issue_type}</strong><br>
-                  Status: ${complaint.status}<br>
-                  ${complaint.description.substring(0, 50)}...
-              `);
+            .bindPopup(
+                `<strong>#${c.id}</strong><br>${c.issue_type}<br>${c.status}`
+            );
         });
 
-        // Modal functions
-        function openResolveModal(complaintId) {
-            document.getElementById('complaintId').value = complaintId;
+        function openResolveModal(id) {
+            document.getElementById('complaintId').value = id;
             document.getElementById('resolveModal').style.display = 'flex';
         }
 
         function closeResolveModal() {
             document.getElementById('resolveModal').style.display = 'none';
-            document.getElementById('afterImagePreview').innerHTML = '';
-            document.querySelector('.upload-placeholder').style.display = 'flex';
         }
-
-        // Image preview
-        document.getElementById('afterImage').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('afterImagePreview').innerHTML = 
-                        `<img src="${event.target.result}" alt="Preview">`;
-                    document.querySelector('.upload-placeholder').style.display = 'none';
-                    document.getElementById('afterImagePreview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
     </script>
 
     {% else %}
-    <!-- Access Denied for Non-Admin Users -->
     <div class="access-denied">
-        <div class="denied-icon">🚫</div>
-        <h2>Access Restricted</h2>
-        <p>This page is only accessible to Ward Admin members.</p>
-        <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+        <h2>Access Restricted 🚫</h2>
     </div>
     {% endif %}
 
-    <div class="background-pattern"></div>
 </body>
 </html>

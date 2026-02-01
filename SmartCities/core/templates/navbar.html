@@ -5,7 +5,8 @@
 
         <!-- Brand -->
         <div class="navbar-brand">
-            <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="brand-link">
+            <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}"
+                class="brand-link">
                 <div class="brand-icon">11</div>
                 <span class="brand-name">SmartCity Insight</span>
             </a>
@@ -18,22 +19,22 @@
             <!-- Authenticated Navigation -->
             <div class="nav-links">
 
-                <a href="{% url 'dashboard' %}" 
-                   class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
+                <a href="{% url 'dashboard' %}"
+                    class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
                     <span class="nav-icon">📊</span>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="{% url 'complaints' %}" 
-                   class="nav-link {% if request.path == '/complaints/' %}active{% endif %}">
+                <a href="{% url 'complaints' %}"
+                    class="nav-link {% if request.path == '/complaints/' %}active{% endif %}">
                     <span class="nav-icon">📄</span>
                     <span>Complaints</span>
                 </a>
 
                 <!-- Citizen-only: New Complaint -->
                 {% if user.role != 'Admin' %}
-                <a href="{% url 'register_complaint' %}" 
-                   class="nav-link {% if request.path == '/register-complaint/' %}active{% endif %}">
+                <a href="{% url 'register_complaint' %}"
+                    class="nav-link {% if request.path == '/register-complaint/' %}active{% endif %}">
                     <span class="nav-icon">➕</span>
                     <span>New Complaint</span>
                 </a>
@@ -41,8 +42,8 @@
 
                 <!-- Admin-only -->
                 {% if user.role == 'Admin' %}
-                <a href="{% url 'admin_dashboard' %}" 
-                   class="nav-link admin-link {% if request.path == '/admin-dashboard/' %}active{% endif %}">
+                <a href="{% url 'admin_dashboard' %}"
+                    class="nav-link admin-link {% if request.path == '/admin-dashboard/' %}active{% endif %}">
                     <span class="nav-icon">🛡️</span>
                     <span>Admin Panel</span>
                 </a>
@@ -80,7 +81,7 @@
                             <span>My Profile</span>
                         </a>
 
-                        <a href="#" class="dropdown-item">
+                        <a href="{% url 'profile_settings' %}" class="dropdown-item">
                             <span class="item-icon">⚙️</span>
                             <span>Settings</span>
                         </a>
@@ -138,7 +139,7 @@
         menu.classList.toggle('mobile-active');
     }
 
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         const userMenu = document.querySelector('.user-menu');
         const dropdown = document.getElementById('userDropdown');
 

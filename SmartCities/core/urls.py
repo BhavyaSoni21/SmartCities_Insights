@@ -16,4 +16,6 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
 
     path('resolve-complaint/', views.resolve_complaint, name='resolve_complaint'),
+    path('settings/', views.profile_settings, name='profile_settings'),
+
 ]

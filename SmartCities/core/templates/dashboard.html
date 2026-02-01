@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
@@ -7,10 +8,13 @@
     <title>Dashboard | SmartCity Insight</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body class="dashboard-page">
     {% include 'navbar.html' %}
 
@@ -126,12 +130,14 @@
                         <span class="btn-icon">📄</span>
                         View Local Complaints
                     </a>
-                    
-                    <!-- Only visible for authenticated users -->
+
+                    <!-- Only visible for citizen users -->
+                    {% if user.profile.role == 'Citizen' %}
                     <a href="{% url 'register_complaint' %}" class="btn btn-primary btn-large">
                         <span class="btn-icon">➕</span>
                         Register Complaint
                     </a>
+                    {% endif %}
                 </div>
             </section>
 
@@ -215,4 +221,5 @@
 
     <div class="background-pattern"></div>
 </body>
+
 </html>

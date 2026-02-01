@@ -23,12 +23,21 @@
             <div class="header-content">
                 <div>
                     <h1 class="page-title">Local Complaints</h1>
-                    <p class="page-subtitle">{{ user.locality }} - All reported issues</p>
+                    <p class="page-subtitle">
+                        {{ user.locality }} -
+                        {% if user.profile.role == 'Admin' %}
+                        All reported issues in your locality
+                        {% else %}
+                        Your reported issues
+                        {% endif %}
+                    </p>
                 </div>
+                {% if user.profile.role == 'Citizen' %}
                 <a href="{% url 'register_complaint' %}" class="btn btn-primary">
                     <span class="btn-icon">➕</span>
                     New Complaint
                 </a>
+                {% endif %}
             </div>
         </header>
 
@@ -121,7 +130,7 @@
 
                         <div class="complaint-reporter">
                             <span class="reporter-label">Reported by:</span>
-                            <span class="reporter-name">{{ complaint.user.profile.name|default:complaint.user.username}}</span>
+                            <span class="reporter-name">{{complaint.user.profile.name|default:complaint.user.username}}</span>
                         </div>
                     </div>
 
@@ -130,30 +139,22 @@
                         {% if complaint.before_image and complaint.before_image.url %}
                         <div class="image-container">
                             <div class="image-label">Before</div>
-                            <img
-                                src="{{ complaint.before_image.url }}"
-                                alt="Before image"
-                                class="complaint-image"
-                                loading="lazy"
-                            >
-                           <small class="debug-path">{{ complaint.before_image.url }}</small>
+                            <img src="{{ complaint.before_image.url }}" alt="Before image" class="complaint-image"
+                                loading="lazy">
+                            <small class="debug-path">{{ complaint.before_image.url }}</small>
                         </div>
                         {% else %}
                         <div class="image-placeholder">
                             <div class="placeholder-text">No Before Image</div>
                         </div>
                         {% endif %}
-                    
+
                         {% if complaint.status == 'resolved' and complaint.after_image and complaint.after_image.url %}
                         <div class="image-arrow">→</div>
                         <div class="image-container">
                             <div class="image-label">After</div>
-                            <img
-                                src="{{ complaint.after_image.url }}"
-                                alt="After image"
-                                class="complaint-image"
-                                loading="lazy"
-                            >
+                            <img src="{{ complaint.after_image.url }}" alt="After image" class="complaint-image"
+                                loading="lazy">
                             <small class="debug-path">{{ complaint.after_image.url }}</small>
                         </div>
                         {% else %}
@@ -200,8 +201,14 @@
             <div class="empty-state">
                 <div class="empty-icon">📭</div>
                 <h2>No Complaints Found</h2>
-                <p>No complaints match your current filters. Try adjusting the filters or register a new complaint.</p>
+                <p>No complaints match your current filters.{% if user.profile.role == 'Citizen' %} Try adjusting the
+                    filters or register a new complaint.
+                    {% else %} Try adjusting the filters.
+                    {% endif %}
+                </p>
+                {% if user.profile.role == 'Citizen' %}
                 <a href="{% url 'register_complaint' %}" class="btn btn-primary">Register First Complaint</a>
+                {% endif %}
             </div>
             {% endfor %}
         </section>
