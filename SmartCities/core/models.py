@@ -15,7 +15,6 @@ class Complaint(models.Model):
         ('other', 'Other'),
     ]
 
-     # 🔥 SLA TIERS (HOURS)
     SLA_TIERS = {
         'garbage': 24,
         'streetlight': 48,
@@ -62,17 +61,11 @@ class Complaint(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
 
-    # ======================
-    # CORE BEHAVIOR
-    # ======================
     def save(self, *args, **kwargs):
         if self.status == 'resolved' and not self.resolved_at:
             self.resolved_at = timezone.now()
         super().save(*args, **kwargs)
 
-    # ======================
-    # SLA LOGIC (TIERS)
-    # ======================
     @property
     def sla_hours(self) -> int:
         """Return SLA hours based on issue type"""
@@ -88,7 +81,6 @@ class Complaint(models.Model):
     @property
     def sla_status(self) -> str:
         if self.status == 'resolved':
-            # If it took longer than SLA → breached, else resolved cleanly
             return 'breached' if self.hours_pending > self.sla_hours else 'resolved'
 
         return 'breached' if self.hours_pending > self.sla_hours else 'active'
@@ -141,15 +133,14 @@ class Complaint(models.Model):
 
     @property
     def sla_status(self):
-        # Example SLA: 3 days
-        if self.status != 'resolved' and self.days_pending > 3:
+        if self.status != 'resolved' and self.hours_pending > self.SLA_TIERS.get(self.issue_type, 3):
             return 'breached'
         return 'active'
 
     @property
-    def days_overdue(self):
+    def hours_overdue(self):
         if self.sla_status == 'breached':
-            return self.days_pending - 3
+            return self.hours_pending - self.SLA_TIERS.get(self.issue_type, 3)
         return 0
 
     def __str__(self):

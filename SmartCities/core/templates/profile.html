@@ -24,7 +24,6 @@
         </header>
         
         <div class="profile-layout">
-            <!-- User Info Section -->
             {% if user.role|lower != 'admin' %}
             <aside class="profile-sidebar">
             {% endif %}
@@ -106,7 +105,6 @@
 
             
             {% if user.role|lower != 'admin' %}
-            <!-- User Complaints Section -->
             <main class="profile-main">
                 <div class="complaints-header">
                     <h2 class="section-title">My Complaints</h2>
@@ -119,8 +117,7 @@
                         </button>
                     </div>
                 </div>
-                <!-- Complaints Content -->
-                <!-- Cards View -->
+
                 <div id="cardsView" class="complaints-cards">
                     {% for complaint in user_complaints %}
                     <div class="user-complaint-card">
@@ -211,7 +208,6 @@
                     {% endfor %}
                 </div>
 
-                <!-- Table View -->
                 <div id="tableView" class="complaints-table" style="display: none;">
                     <div class="table-wrapper">
                         <table>
@@ -266,7 +262,6 @@
                     </div>
                 </div>
             </main>
-            <!-- complaints UI -->
             {% endif %}
 
         </div>

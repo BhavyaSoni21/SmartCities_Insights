@@ -5,23 +5,16 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
-import json # For JSON serialization
-from django.core.serializers.json import DjangoJSONEncoder # Better serialization
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator
-
 from .models import Complaint, UserProfile            
 from django.contrib.auth import get_user_model
 from .forms import UserForm, ProfileForm
 from django.db.models import Count
-
 from django.db.models import Avg, F, ExpressionWrapper, DurationField
 
-
 def _attach_profile_attrs(request: HttpRequest) -> None:
-    """
-    Templates reference attributes like `user.name`, `user.role`, etc.
-    Default Django `User` doesn't have these, so we attach them from UserProfile.
-    """
     user = getattr(request, "user", None)
     if not user or not getattr(user, "is_authenticated", False):
         return
@@ -36,7 +29,6 @@ def _attach_profile_attrs(request: HttpRequest) -> None:
         },
     )
 
-    # Monkeypatch common template fields onto `request.user`
     user.name = profile.name or user.get_full_name() or user.get_username()
     user.role = profile.role
     user.locality = profile.locality
@@ -45,18 +37,14 @@ def _attach_profile_attrs(request: HttpRequest) -> None:
     user.age = profile.age
 
 def index(request: HttpRequest) -> HttpResponse:
-    # Only citizen profiles
     citizen_profiles = UserProfile.objects.filter(role='Citizen')
 
-    # Only complaints raised by citizens
     citizen_complaints = Complaint.objects.filter(
         user__profile__role='Citizen'
     )
 
-    # Issues resolved (citizen complaints only)
     resolved_count = citizen_complaints.filter(status='resolved').count()
 
-    # Active citizens = distinct citizen users who filed complaints
     active_citizens = (
         citizen_complaints
         .values('user')
@@ -64,7 +52,6 @@ def index(request: HttpRequest) -> HttpResponse:
         .count()
     )
 
-    # Localities covered = distinct localities from citizen profiles
     localities_covered = (
         citizen_profiles
         .exclude(locality='')
@@ -85,9 +72,6 @@ def index(request: HttpRequest) -> HttpResponse:
 def dashboard(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
 
-    # ======================
-    # DATA SCOPE
-    # ======================
     if request.user.role == 'Admin':
         complaints_qs = Complaint.objects.select_related(
             'user', 'user__profile'
@@ -101,21 +85,19 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         top_complaints = []
 
     complaints_qs = complaints_qs.order_by('-created_at')
-
-    # ======================
-    # BASIC STATS
-    # ======================
     
     total_complaints = complaints_qs.count()
     resolved_count = complaints_qs.filter(status='resolved').count()
     pending_count = complaints_qs.filter(status='pending').count()
+    
+    pending_complaints_list = complaints_qs.filter(status='pending')
+    pending_sla_breached = sum(1 for c in pending_complaints_list if c.sla_status == 'breached')
+    pending_in_sla = sum(1 for c in pending_complaints_list if c.sla_status == 'active')
+    
     sla_breached_count = sum(
         1 for c in complaints_qs if c.sla_status == 'breached'
     )
 
-    # ======================
-    # AVERAGE RESOLUTION TIME (HOURS)
-    # ======================
     resolved_items = complaints_qs.filter(
         status='resolved',
         resolved_at__isnull=False
@@ -135,9 +117,6 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         else None
     )
 
-    # ======================
-    # MAP DATA
-    # ======================
     complaints_json = [
         {
             'id': c.id,
@@ -151,9 +130,6 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         for c in complaints_qs
     ]
 
-    # ======================
-    # RECENT ACTIVITY
-    # ======================
     recent_activities = [
         {
             'id': c.id,
@@ -175,6 +151,8 @@ def dashboard(request: HttpRequest) -> HttpResponse:
             'total_complaints': total_complaints,
             'resolved_complaints': resolved_count,
             'pending_complaints': pending_count,
+            'pending_sla_breached': pending_sla_breached,
+            'pending_in_sla': pending_in_sla,
             'sla_breached_count': sla_breached_count,
             'avg_resolution_time': avg_resolution_time,
             'active_reporters': complaints_qs.values('user').distinct().count(),
@@ -195,14 +173,12 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 def complaints(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
 
-    # ROLE-BASED VISIBILITY
     complaints_qs = Complaint.objects.select_related(
         'user', 'user__profile'
     ).all()
 
     complaints_qs = complaints_qs.order_by('-created_at')
 
-    # Pagination (your template expects this)
     paginator = Paginator(complaints_qs, 6)
     page_number = request.GET.get('page')
     complaints_page = paginator.get_page(page_number)
@@ -215,8 +191,6 @@ def complaints(request: HttpRequest) -> HttpResponse:
         }
     )
 
-
-
 @login_required
 def complaint_detail(request: HttpRequest, pk: int) -> HttpResponse:
     _attach_profile_attrs(request)
@@ -228,10 +202,8 @@ def complaint_detail(request: HttpRequest, pk: int) -> HttpResponse:
 def profile(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
     
-    # Fetch complaints for the current user
     user_complaints = Complaint.objects.filter(user=request.user).order_by('-created_at')
     
-    # Calculate stats
     total_complaints = user_complaints.count()
     resolved_complaints = user_complaints.filter(status='resolved').count()
     pending_complaints = user_complaints.filter(status='pending').count()
@@ -250,7 +222,6 @@ def profile(request: HttpRequest) -> HttpResponse:
 def register_complaint(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
     if request.method == 'POST':
-        # Extract data
         issue_type = request.POST.get('issue_type', 'other')
         description = request.POST.get('description', '')
         landmark = request.POST.get('landmark', '')
@@ -258,15 +229,13 @@ def register_complaint(request: HttpRequest) -> HttpResponse:
         longitude = request.POST.get('longitude')
         before_image = request.FILES.get('before_image')
 
-        # Generate a title since form doesn't have one
         title = f"{issue_type.title()} Issue"
         if landmark:
             title += f" near {landmark}"
         
-        # Create complaint
         Complaint.objects.create(
             user=request.user,
-            title=title[:200], # Ensure max length
+            title=title[:200], 
             description=description,
             issue_type=issue_type,
             landmark=landmark,
@@ -286,10 +255,8 @@ def admin_dashboard(request: HttpRequest) -> HttpResponse:
     _attach_profile_attrs(request)
     
     if request.user.role != 'Admin':
-         # In a real app check permission properly. For demo, we rely on _attach_profile_attrs
          pass
 
-    # Fetch data
     complaints_qs = Complaint.objects.select_related('user').all()
     
     total_complaints = complaints_qs.count()
@@ -305,19 +272,15 @@ def admin_dashboard(request: HttpRequest) -> HttpResponse:
     if total_complaints > 0:
         resolution_rate = int((resolved_complaints / total_complaints) * 100)
 
-    # Calculate SLA breaches and convert to list for template
     all_complaints_list = []
     sla_breached_complaints = []
     
     for c in complaints_qs:
         item = c
-        # Ensure properties are available or pre-calculated if not using model methods in template
-        # Template uses c.days_pending, c.sla_status, c.issue_type, c.description, c.id, c.user.name, c.landmark
-        
+                
         if c.sla_status == 'breached':
             sla_breached_complaints.append(c)
         
-        # Determine status color/marker for map
         marker_color = 'orange'
         if c.status == 'resolved':
             marker_color = 'green'
@@ -326,9 +289,9 @@ def admin_dashboard(request: HttpRequest) -> HttpResponse:
 
         all_complaints_list.append({
             'id': c.id,
-            'issue_type': c.issue_type, # ensure TitleCase in template or use get_display
+            'issue_type': c.issue_type, 
             'description': c.description,
-            'latitude': c.latitude or 19.0760, # Fallback
+            'latitude': c.latitude or 19.0760,
             'longitude': c.longitude or 72.8777,
             'status': c.status,
             'sla_status': c.sla_status,
@@ -338,7 +301,6 @@ def admin_dashboard(request: HttpRequest) -> HttpResponse:
         1 for c in complaints_qs if c.sla_status == 'breached'
     )
 
-    
     context = {
         'sla_breached_count': sla_breached_count,
         'total_complaints': total_complaints,
@@ -347,7 +309,7 @@ def admin_dashboard(request: HttpRequest) -> HttpResponse:
         'resolved_complaints': resolved_complaints,
         'resolution_rate': resolution_rate,
         'sla_breached_complaints': sla_breached_complaints,
-        'pending_complaints_list': pending_complaints_qs, # Or sort them
+        'pending_complaints_list': pending_complaints_qs, 
         'ward_center_lat': 19.0760,
         'ward_center_lng': 72.8777,
         'complaints_json': json.dumps(all_complaints_list, cls=DjangoJSONEncoder),
@@ -371,7 +333,6 @@ def resolve_complaint(request: HttpRequest) -> HttpResponse:
     complaint.status = 'resolved'
     if after_image:
         complaint.after_image = after_image
-    # You might want to save notes somewhere
     complaint.save()
 
     messages.success(request, 'Complaint marked as resolved.')
@@ -383,7 +344,6 @@ def login_view(request: HttpRequest) -> HttpResponse:
         email = (request.POST.get('email') or '').strip().lower()
         password = request.POST.get('password') or ''
 
-        # Temporary demo bypass: if demo credentials, auto-create account
         if email == 'demo@city.com' and password == 'demo12345':
             User = get_user_model()
             try:
@@ -399,7 +359,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
                         user=user,
                         defaults={
                             'name': 'Demo User',
-                            'role': 'Admin', # CHANGED TO ADMIN FOR DEMO
+                            'role': 'Admin', 
                             'locality': 'Ward 1 - Central District',
                             'ward_number': '1',
                             'mobile': '9999999999',
@@ -407,21 +367,19 @@ def login_view(request: HttpRequest) -> HttpResponse:
                         }
                     )
                 else: 
-                     # Ensure existing demo user is Admin for testing
-                     if hasattr(user, 'profile'):
-                         if user.profile.role != 'Admin':
-                             user.profile.role = 'Admin'
-                             user.profile.save()
+                    if hasattr(user, 'profile'):
+                        if user.profile.role != 'Admin':
+                            user.profile.role = 'Admin'
+                            user.profile.save()
 
                 auth_login(request, user)
                 _attach_profile_attrs(request)
                 messages.success(request, 'Logged in successfully.')
-                return redirect('admin_dashboard') # Redirect to admin dashboard for demo
+                return redirect('admin_dashboard') 
             except Exception as e:
                 messages.error(request, f'Database error. Please register a new account or check database permissions.')
                 return render(request, 'login.html', {})
 
-        # Normal authentication
         user = authenticate(request, username=email, password=password)
         if user is None:
             messages.error(request, 'Invalid email or password.')
@@ -431,7 +389,6 @@ def login_view(request: HttpRequest) -> HttpResponse:
         _attach_profile_attrs(request)
         messages.success(request, 'Logged in successfully.')
         
-        # Check role on request.user as it is the one patched by _attach_profile_attrs
         if getattr(request.user, 'role', 'Citizen') == 'Admin':
             return redirect('admin_dashboard')
         return redirect('dashboard')
@@ -475,7 +432,6 @@ def register_view(request: HttpRequest) -> HttpResponse:
 
 def logout_view(request: HttpRequest) -> HttpResponse:
     auth_logout(request)
-    # Navbar uses this named URL; always return to index.
     return redirect(reverse('index'))
 
 @login_required

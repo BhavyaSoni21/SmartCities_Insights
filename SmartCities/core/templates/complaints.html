@@ -41,7 +41,6 @@
             </div>
         </header>
 
-        <!-- Filters Section -->
         <section class="filters-section">
             <div class="filters-container">
                 <div class="filter-group">
@@ -87,7 +86,6 @@
             </div>
         </section>
 
-        <!-- Complaints List -->
         <section class="complaints-list">
             {% for complaint in complaints %}
             <div class="complaint-card" data-status="{{ complaint.status }}" data-type="{{ complaint.issue_type }}"
@@ -158,7 +156,6 @@
                             <div class="image-label">Before</div>
                             <img src="{{ complaint.before_image.url }}" alt="Before image" class="complaint-image"
                                 loading="lazy">
-                            <!-- <small class="debug-path">{{ complaint.before_image.url }}</small> -->
                         </div>
                         {% else %}
                         <div class="image-placeholder">
@@ -172,7 +169,6 @@
                             <div class="image-label">After</div>
                             <img src="{{ complaint.after_image.url }}" alt="After image" class="complaint-image"
                                 loading="lazy">
-                            <!-- <small class="debug-path">{{ complaint.after_image.url }}</small> -->
                         </div>
                         {% else %}
                         <div class="image-placeholder">
@@ -239,7 +235,6 @@
             {% endfor %}
         </section>
 
-        <!-- Pagination -->
         {% if complaints.has_other_pages %}
         <div class="pagination">
             {% if complaints.has_previous %}
@@ -307,7 +302,6 @@
         filterComplaints();
     }
 
-    // Attach listeners safely (prevents JS errors)
     document.addEventListener('DOMContentLoaded', () => {
         const statusFilter = document.getElementById('statusFilter');
         const typeFilter = document.getElementById('typeFilter');

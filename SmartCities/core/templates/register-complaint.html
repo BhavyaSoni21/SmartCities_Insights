@@ -170,9 +170,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
         
-            /* -------------------------
-               CHARACTER COUNTER
-            -------------------------- */
             const descTextarea = document.getElementById('description');
             const charCount = document.getElementById('charCount');
             const MAX_CHARS = 500;
@@ -188,9 +185,6 @@
                 });
             }
         
-            /* -------------------------
-               IMAGE PREVIEW (SAFE)
-            -------------------------- */
             const fileInput = document.getElementById('before_image');
             const imagePreview = document.getElementById('imagePreview');
             const uploadPlaceholder = document.querySelector('.upload-placeholder');
@@ -222,9 +216,6 @@
                 });
             }
         
-            /* -------------------------
-               MAP (LEAFLET)
-            -------------------------- */
             const mapElement = document.getElementById('map');
             if (!mapElement) return;
         
@@ -255,9 +246,6 @@
                     `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             });
         
-            /* -------------------------
-               FORM VALIDATION
-            -------------------------- */
             const form = document.querySelector('form');
             if (form) {
                 form.addEventListener('submit', function (e) {
@@ -275,7 +263,6 @@
     </script>        
 
     {% else %}
-    <!-- Not Authenticated View -->
     <div class="auth-required-page">
         <div class="auth-required">
             <div class="auth-required-icon">🔒</div>

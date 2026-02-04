@@ -36,7 +36,6 @@
 
         {% if user.is_authenticated %}
         <main class="dashboard-main">
-            <!-- Statistics Section -->
             <section class="stats-section">
                 <div class="stats-grid">
                     <div class="stat-card stat-total">
@@ -80,7 +79,6 @@
                 </div>
             </section>
 
-            <!-- Visual Analytics Section -->
             <section class="analytics-section">
                 <div class="analytics-grid">
                     <div class="chart-container">
@@ -104,7 +102,7 @@
                         <h2 class="section-title">Locality Insights</h2>
                         <div class="insight-cards">
                             <div class="insight-card">
-                                <div class="insight-metric">{{ sla_breached|default:0 }}</div>
+                                <div class="insight-metric">{{ sla_breached_count|default:0 }}</div>
                                 <div class="insight-label">SLA Breached</div>
                                 <div class="insight-indicator critical">Needs Attention</div>
                             </div>
@@ -123,7 +121,6 @@
                 </div>
             </section>
 
-            <!-- Action Buttons -->
             <section class="actions-section">
                 <div class="action-buttons">
                     <a href="{% url 'complaints' %}" class="btn btn-secondary btn-large">
@@ -131,7 +128,6 @@
                         View Local Complaints
                     </a>
 
-                    <!-- Only visible for citizen users -->
                     {% if user.profile.role == 'Citizen' %}
                     <a href="{% url 'register_complaint' %}" class="btn btn-primary btn-large">
                         <span class="btn-icon">➕</span>
@@ -141,7 +137,6 @@
                 </div>
             </section>
 
-            <!-- Recent Activity -->
             <section class="activity-section">
                 <h2 class="section-title">
                     {% if user.profile.role == 'Admin' %}
@@ -195,7 +190,6 @@
         </main>
 
         {% else %}
-        <!-- Not Authenticated View -->
         <div class="auth-required">
             <div class="auth-required-icon">🔒</div>
             <h2>Authentication Required</h2>
@@ -207,7 +201,6 @@
 
     {% if user.is_authenticated %}
     <script>
-        // Chart.js implementation for pie chart
         const ctx = document.getElementById('statusPieChart');
         if (ctx) {
             new Chart(ctx, {
