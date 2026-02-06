@@ -1,11 +1,11 @@
-# 🏙️ SmartCity Insight  
+# SmartCity Insight  
 **Urban Issue Management Platform | SDG 11 Aligned**
 
 SmartCity Insight is a responsive, role-based web application designed to streamline urban issue reporting and resolution. Built with a strong civic-first design philosophy, the platform empowers citizens and administrators to collaboratively improve city infrastructure while aligning with **UN SDG 11: Sustainable Cities and Communities**.
 
 ---
 
-## 🌍 Purpose
+## Purpose
 
 Cities don’t fail because problems don’t exist.  
 They fail because problems aren’t tracked, visualized, or resolved on time.
@@ -14,7 +14,7 @@ SmartCity Insight fixes that.
 
 ---
 
-## ✨ Key Highlights
+## Key Highlights
 
 - Role-based access (Citizen / Admin)
 - Locality-wise complaint tracking
@@ -25,7 +25,7 @@ SmartCity Insight fixes that.
 
 ---
 
-## 🎨 Design System
+## Design System
 
 **Visual Tone**: Civic, professional, accountable  
 
@@ -46,7 +46,7 @@ SmartCity Insight fixes that.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 ```
 SmartCities_Insights/
 │
@@ -91,9 +91,9 @@ SmartCities_Insights/
 ```
 ---
 
-## 📄 Pages & Access Levels (Actual File Mapping)
+## Pages & Access Levels (Actual File Mapping)
 
-### 🌐 Public Pages (No Login Required)
+### Public Pages (No Login Required)
 
 * **`index.html`**
   Landing page introducing SmartCity Insight.
@@ -107,7 +107,7 @@ SmartCities_Insights/
 
 ---
 
-### 🔐 Authenticated Pages (Login Required)
+### Authenticated Pages (Login Required)
 
 * **`dashboard.html`**
   Locality-level dashboard showing complaint statistics, status distribution, and recent activity.
@@ -133,7 +133,7 @@ SmartCities_Insights/
 
 ---
 
-### 🛡️ Admin-Only Pages
+### Admin-Only Pages
 
 * **`admin-dashboard.html`**
   Administrative control panel featuring:
@@ -144,7 +144,7 @@ SmartCities_Insights/
 
 ---
 
-### 🧩 Shared Components
+### Shared Components
 
 * **`navbar.html`**
   Reusable navigation component included across all pages.
@@ -152,7 +152,7 @@ SmartCities_Insights/
 
 ---
 
-### ⚠️ Note on Styles
+### Note on Styles
 
 * **`styles.css`**
   Currently located inside the `templates` directory.
@@ -160,7 +160,7 @@ SmartCities_Insights/
   
 ---
 
-## 🔐 Access Control Logic
+## Access Control Logic
 
 ```django
 {% if user.is_authenticated %}
@@ -174,7 +174,7 @@ SmartCities_Insights/
 
 ---
 
-## 🧠 SLA System
+## SLA System
 
 | Issue Type  | SLA Time |
 | ----------- | -------- |
@@ -196,7 +196,7 @@ Backend calculates:
 
 ---
 
-## 🗺️ Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -213,7 +213,7 @@ Backend calculates:
 
 ---
 
-## 🔗 Django URL Configuration
+## Django URL Configuration
 
 ```python
 urlpatterns = [
@@ -233,13 +233,13 @@ urlpatterns = [
 ```
 ---
 
-## 📦 Required Context Variables (Template-Aligned)
+## Required Context Variables (Template-Aligned)
 
 These context variables are expected to be provided by Django views to properly render each template.
 
 ---
 
-### 🏠 `dashboard.html`
+### `dashboard.html`
 
 ```python
 {
@@ -260,7 +260,7 @@ Used for:
 
 ---
 
-### 📋 `complaints.html`
+### `complaints.html`
 
 ```python
 {
@@ -285,7 +285,7 @@ Each complaint object should expose:
 
 ---
 
-### 🔍 `complaint-detail.html`
+### `complaint-detail.html`
 
 ```python
 {
@@ -303,7 +303,7 @@ Used for:
 
 ---
 
-### 🧑 `profile.html`
+### `profile.html`
 
 ```python
 {
@@ -322,7 +322,7 @@ Used for:
 
 ---
 
-### ⚙️ `settings.html`
+### `settings.html`
 
 ```python
 {
@@ -338,7 +338,7 @@ Used for:
 
 ---
 
-### 🛡️ `admin-dashboard.html` (Admin Only)
+### `admin-dashboard.html` (Admin Only)
 
 ```python
 {
@@ -363,7 +363,7 @@ Used for:
 
 ---
 
-### 🧭 Global (Used Across Templates)
+### Global (Used Across Templates)
 
 ```python
 {
@@ -375,7 +375,7 @@ Available implicitly via Django’s request context.
 
 ---
 
-## 📱 Responsive Breakpoints
+## Responsive Breakpoints
 
 * Desktop: ≥1200px
 * Tablet: 768px – 1199px
@@ -383,7 +383,7 @@ Available implicitly via Django’s request context.
 
 ---
 
-## 🚀 Deployment Checklist
+## Deployment Checklist
 
 * Django auth configured
 * MEDIA_ROOT / MEDIA_URL set
@@ -395,7 +395,7 @@ Available implicitly via Django’s request context.
 
 ---
 
-## 🎯 Project Significance
+## Project Significance
 
 SmartCity Insight models a real-world urban grievance system rather than a generic CRUD application.
 
@@ -414,7 +414,7 @@ This makes the project suitable for:
 
 ---
 
-## 🌱 SDG Alignment
+## SDG Alignment
 
 **UN Sustainable Development Goal 11 – Sustainable Cities and Communities**
 
