@@ -351,14 +351,15 @@ a:hover {
     font-family: var(--font-display);
     font-size: 2rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--primary-dark);
 }
 
 .stat-label {
     font-size: 0.875rem;
-    color: var(--text-muted);
+    color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    font-weight: 500;
 }
 
 .stat-divider {
@@ -3103,7 +3104,7 @@ td {
     font-size: 1rem;
 }
 
-.stat-item {
+.profile-stats .stat-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -3111,17 +3112,17 @@ td {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.stat-item:last-child {
+.profile-stats .stat-item:last-child {
     border-bottom: none;
 }
 
-.stat-label {
+.profile-stats .stat-label {
     font-size: 0.9rem;
     opacity: 0.9;
     color: rgba(255, 255, 255, 0.95);
 }
 
-.stat-value {
+.profile-stats .stat-value {
     font-size: 1.25rem;
     font-weight: 600;
     color: #ffffff;
